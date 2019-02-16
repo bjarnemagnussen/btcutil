@@ -558,32 +558,38 @@ func TestGenenerateSeed(t *testing.T) {
 // TestExtendedKeyAPI ensures the API on the ExtendedKey type works as intended.
 func TestExtendedKeyAPI(t *testing.T) {
 	tests := []struct {
-		name       string
-		extKey     string
-		isPrivate  bool
-		parentFP   uint32
-		privKey    string
-		privKeyErr error
-		pubKey     string
-		address    string
+		name           string
+		extKey         string
+		isPrivate      bool
+		parentFP       uint32
+		privKey        string
+		privKeyErr     error
+		pubKey         string
+		address        string
+		addressNP2WPKH string
+		addressP2WPKH  string
 	}{
 		{
-			name:      "test vector 1 master node private",
-			extKey:    "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi",
-			isPrivate: true,
-			parentFP:  0,
-			privKey:   "e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35",
-			pubKey:    "0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2",
-			address:   "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma",
+			name:           "test vector 1 master node private",
+			extKey:         "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi",
+			isPrivate:      true,
+			parentFP:       0,
+			privKey:        "e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35",
+			pubKey:         "0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2",
+			address:        "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma",
+			addressNP2WPKH: "3PpgpssV7mcAGpZRWiCWhodUTnjpoSZg7a",
+			addressP2WPKH:  "bc1qx3ppj0smkuy3d6g525sh9n2w9k7fm7q3x30rtg",
 		},
 		{
-			name:       "test vector 1 chain m/0H/1/2H public",
-			extKey:     "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5",
-			isPrivate:  false,
-			parentFP:   3203769081,
-			privKeyErr: ErrNotPrivExtKey,
-			pubKey:     "0357bfe1e341d01c69fe5654309956cbea516822fba8a601743a012a7896ee8dc2",
-			address:    "1NjxqbA9aZWnh17q1UW3rB4EPu79wDXj7x",
+			name:           "test vector 1 chain m/0H/1/2H public",
+			extKey:         "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5",
+			isPrivate:      false,
+			parentFP:       3203769081,
+			privKeyErr:     ErrNotPrivExtKey,
+			pubKey:         "0357bfe1e341d01c69fe5654309956cbea516822fba8a601743a012a7896ee8dc2",
+			address:        "1NjxqbA9aZWnh17q1UW3rB4EPu79wDXj7x",
+			addressNP2WPKH: "3NpdZ19ArtjGyY4jDd7gzz1vHGi67wG6et",
+			addressP2WPKH:  "bc1qaeatjrx7265vpc4mpp4vf96ghrdemnnj5l9kr5",
 		},
 	}
 
@@ -658,6 +664,32 @@ func TestExtendedKeyAPI(t *testing.T) {
 			t.Errorf("Address #%d (%s): mismatched address -- want "+
 				"%s, got %s", i, test.name, test.address,
 				addr.EncodeAddress())
+			continue
+		}
+
+		addrNP2WPKH, err := key.AddressNP2WPKH(&chaincfg.MainNetParams)
+		if err != nil {
+			t.Errorf("NP2WPKH address #%d (%s): unexpected error: %v", i,
+				test.name, err)
+			continue
+		}
+		if addrNP2WPKH.EncodeAddress() != test.addressNP2WPKH {
+			t.Errorf("NP2WPKH address #%d (%s): mismatched address -- want "+
+				"%s, got %s", i, test.name, test.addressNP2WPKH,
+				addrNP2WPKH.EncodeAddress())
+			continue
+		}
+
+		addrP2WPKH, err := key.AddressP2WPKH(&chaincfg.MainNetParams)
+		if err != nil {
+			t.Errorf("NP2WPKH address #%d (%s): unexpected error: %v", i,
+				test.name, err)
+			continue
+		}
+		if addrP2WPKH.EncodeAddress() != test.addressP2WPKH {
+			t.Errorf("NP2WPKH address #%d (%s): mismatched address -- want "+
+				"%s, got %s", i, test.name, test.addressP2WPKH,
+				addrP2WPKH.EncodeAddress())
 			continue
 		}
 	}
